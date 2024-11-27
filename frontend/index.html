@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es-PE">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Replit 2</title>
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+	<link rel="manifest" href="/site.webmanifest">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/hint/show-hint.min.css"> <!-- Estilos del autocompletado -->
+	<link rel="stylesheet" href="assets/css/style.css">
+
+</head>
+<body>
+
+	<!-- Área de Inicio -->
+	<section id="inicio" class="section" hidden>
+		<header>
+			<h1>Bienvenido al Compilador Colaborativo</h1>
+			<p>Un espacio donde puedes escribir, compartir y ejecutar código en tiempo real.</p>
+		</header>
+		<div class="actions">
+			<button onclick="mostrarSeccion('registro')">Registrarse</button>
+			<button onclick="mostrarSeccion('login')">Iniciar Sesión</button>
+		</div>
+	</section>
+
+	<!-- Área de Registro -->
+	<section id="registro" class="section" hidden>
+		<header>
+			<h1>Registro</h1>
+		</header>
+		<form id="formRegister">
+			<label for="username">Nombre de Usuario:</label>
+			<input type="text" id="username" name="username" required>
+			<label for="email">Correo Electrónico:</label>
+			<input type="email" id="email" name="email" required>
+			<label for="password">Contraseña:</label>
+			<input type="password" id="password" name="password" required>
+			<button type="submit">Registrarse</button>
+		</form>
+		<button onclick="mostrarSeccion('inicio')">Volver</button>
+	</section>
+
+	<!-- Área de Login -->
+	<section id="login" class="section" hidden>
+		<header>
+			<h1>Iniciar Sesión</h1>
+		</header>
+		<form id="formLogin">
+			<label for="loginUser">Usuario:</label>
+			<input type="email" id="loginEmail" name="email" required>
+			<label for="loginPass">Contraseña:</label>
+			<input type="password" id="loginPassword" name="password" required>
+			<button type="submit">Entrar</button>
+		</form>
+		<button onclick="mostrarSeccion('inicio')">Volver</button>
+	</section>
+
+	<!-- Área de Trabajo del Compilador Colaborativo -->
+	<section id="compilador" class="section" hidden>
+		<header>
+			<!--
+			<h1>¡Hola desde el Frontend!</h1>
+			<button id="testBackend">Probar Backend</button>
+			<p id="response"></p>
+			-->
+
+			<div class="header-container">
+				<svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<rect x="0.5" y="0.5" width="19" height="17" rx="1.5" stroke="white"/>
+					<line x1="5.5" y1="1" x2="5.5" y2="17" stroke="white"/>
+				</svg>		
+				<h1 contenteditable>Proyecto con un nombre chido</h1>
+			</div>
+			<button type="button" id="run_button">
+				<svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path fill-rule="evenodd" clip-rule="evenodd" d="M10.7965 5.955C10.8933 6.00933 10.9739 6.08845 11.0299 6.18424C11.086 6.28002 11.1156 6.38901 11.1156 6.5C11.1156 6.61099 11.086 6.71998 11.0299 6.81576C10.9739 6.91155 10.8933 6.99067 10.7965 7.045L3.5565 11.1175C3.46137 11.171 3.35389 11.1987 3.24474 11.1978C3.13559 11.1969 3.02859 11.1674 2.93438 11.1123C2.84017 11.0571 2.76203 10.9783 2.70776 10.8836C2.65348 10.7889 2.62495 10.6817 2.625 10.5725V2.4275C2.62495 2.31835 2.65348 2.21108 2.70776 2.11639C2.76203 2.02169 2.84017 1.94285 2.93438 1.88773C3.02859 1.83261 3.13559 1.80313 3.24474 1.80221C3.35389 1.80129 3.46137 1.82897 3.5565 1.8825L10.7965 5.9555V5.955Z" fill="#004D0D"/>
+				</svg>
+				Run			
+			</button>
+			<div class="info">
+			    <img src="default.jpeg" alt="Imagen de usuario" width="32" height="32">
+			    <span>@usuario</span>
+			</div>
+
+		</header>
+
+		<main>
+			<article>
+				<header>
+					<div class="tab">
+						<svg width="12" height="17" viewBox="0 0 12 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<g clip-path="url(#clip0_9_34)">
+							<path d="M2 15C1.725 15 1.5 14.775 1.5 14.5V2.5C1.5 2.225 1.725 2 2 2H7V4.5C7 5.05313 7.44687 5.5 8 5.5H10.5V14.5C10.5 14.775 10.275 15 10 15H2ZM2 0.5C0.896875 0.5 0 1.39688 0 2.5V14.5C0 15.6031 0.896875 16.5 2 16.5H10C11.1031 16.5 12 15.6031 12 14.5V5.32812C12 4.79688 11.7906 4.2875 11.4156 3.9125L8.58438 1.08438C8.20938 0.709375 7.70312 0.5 7.17188 0.5H2ZM5.03125 9.53125C5.325 9.2375 5.325 8.7625 5.03125 8.47188C4.7375 8.18125 4.2625 8.17813 3.97187 8.47188L2.46875 9.96875C2.175 10.2625 2.175 10.7375 2.46875 11.0281L3.96875 12.5281C4.2625 12.8219 4.7375 12.8219 5.02812 12.5281C5.31875 12.2344 5.32187 11.7594 5.02812 11.4688L4.05937 10.5L5.02812 9.53125H5.03125ZM8.03125 8.46875C7.7375 8.175 7.2625 8.175 6.97188 8.46875C6.68125 8.7625 6.67813 9.2375 6.97188 9.52812L7.94063 10.4969L6.97188 11.4656C6.67813 11.7594 6.67813 12.2344 6.97188 12.525C7.26563 12.8156 7.74062 12.8187 8.03125 12.525L9.53125 11.025C9.825 10.7312 9.825 10.2562 9.53125 9.96562L8.03125 8.46562V8.46875Z" fill="white"/>
+							</g>
+							<defs>
+							<clipPath id="clip0_9_34">
+							<rect width="12" height="16" fill="white" transform="translate(0 0.5)"/>
+							</clipPath>
+							</defs>
+						</svg>
+						main.py
+					</div>		
+				</header>
+				<section>
+					<textarea name="code" id="code" title="code"></textarea>
+				</section>
+			</article>
+			<article>
+				<header>
+					<div class="tab">
+						<svg width="18" height="17" viewBox="0 0 18 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M0.293751 3.20626C-0.0968742 2.81564 -0.0968742 2.18439 0.293751 1.79376C0.684376 1.40314 1.31875 1.40314 1.70938 1.79376L7.70938 7.79376C8.1 8.18439 8.1 8.81876 7.70938 9.20939L1.70938 15.2094C1.31875 15.6 0.684376 15.6 0.293751 15.2094C-0.0968742 14.8188 -0.0968742 14.1844 0.293751 13.7938L5.58438 8.50001L0.293751 3.20626ZM8 13.5H17C17.5531 13.5 18 13.9469 18 14.5C18 15.0531 17.5531 15.5 17 15.5H8C7.44688 15.5 7 15.0531 7 14.5C7 13.9469 7.44688 13.5 8 13.5Z" fill="white"/>
+						</svg>
+						Terminal
+					</div>
+					<button id="clearConsole" type="button">
+						<svg width="18" height="17" viewBox="0 0 18 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<g clip-path="url(#clip0_13_43)">
+							<path d="M17.7062 2.20624C18.0969 1.81562 18.0969 1.18124 17.7062 0.790619C17.3156 0.399994 16.6812 0.399994 16.2906 0.790619L10.2906 6.79062L9.20625 5.70624C9.075 5.57499 8.89375 5.49999 8.70625 5.49999C8.31563 5.49999 8 5.81562 8 6.20624V7.11562L11.3844 10.5H12.2937C12.6844 10.5 13 10.1844 13 9.79374C13 9.60624 12.925 9.42499 12.7937 9.29374L11.7094 8.20937L17.7094 2.20937L17.7062 2.20624ZM10.6594 11.5437L6.95625 7.84062C5.62188 7.72499 4.29375 8.20624 3.3375 9.16249L3.0875 9.41249C2.39063 10.1094 2 11.0531 2 12.0375C2 12.25 2.22187 12.3875 2.4125 12.2937L4.00938 11.4969C4.16563 11.4187 4.30625 11.625 4.17812 11.7437L0.228125 15.2937C0.084375 15.425 0 15.6125 0 15.8094C0 16.1906 0.309375 16.5 0.690625 16.5H6.10625C7.31875 16.5 8.47812 16.0187 9.3375 15.1625C10.2937 14.2062 10.7719 12.8781 10.6594 11.5437Z" fill="#757B86"/>
+							</g>
+							<defs>
+							<clipPath id="clip0_13_43">
+							<rect width="18" height="16" fill="white" transform="translate(0 0.5)"/>
+							</clipPath>
+							</defs>
+						</svg>						
+						Clear Terminal
+					</button>			
+				</header>
+				<section id="results">
+					<pre>Escriba código para empezar</pre>
+				</section>
+			</article>
+		</main>
+	</section>
+
+	<script src="assets/js/script.js"></script>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/python/python.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/hint/show-hint.min.js"></script> <!-- Autocompletado -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/hint/python-hint.min.js"></script> <!-- Autocompletado específico para Python -->
+	<script>
+		var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+            lineNumbers: true,
+            mode: "python",
+            theme: "default", // Puedes cambiar al tema que prefieras
+            autofocus: true,
+            extraKeys: { "Ctrl-Space": "autocomplete" }, // Habilitar autocompletado con Ctrl+Espacio
+            hintOptions: { "completeSingle": false } // Mostrar lista de sugerencias automáticamente al escribir
+        });
+
+		let results = document.getElementById('results');
+
+		document.getElementById('clearConsole').addEventListener('click', function() {
+			results.innerHTML = '';
+		})
+
+	</script>
+</body>
+</html>
