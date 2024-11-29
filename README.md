@@ -5,9 +5,9 @@ Este proyecto es una aplicación web colaborativa que permite a los usuarios edi
 ## Requisitos Previos
 
 # 1. Software Necesario:
-# - Node.js
-# - XAMPP
-# - MySQL (incluido con XAMPP)
+ - Node.js
+ - XAMPP
+ - MySQL (incluido con XAMPP)
 
 # 2. Paquetes NPM Necesarios:
 npm install express dotenv mysql2 cors body-parser codemirror mongoose
@@ -16,29 +16,30 @@ npm install express dotenv mysql2 cors body-parser codemirror mongoose
 npm install -g live-server
 
 # 4. Estructura del Proyecto:
-# replit-make/
-# |--- backend/
-# |    |--- config/
-# |    |    |--- db.js
-# |    |--- routes/
-# |    |--- controllers/
-# |    |--- models/
-# |    |--- server.js
-# |
-# |--- frontend/
-# |    |--- assets/
-# |    |    |--- css/style.css 
-# |    |    |--- js/script.js 
-# |    |--- index.html
-# |
-# |--- .env
-# |--- package.json
-# |--- package-lock.json
+replit-make/
+|--- backend/
+|    |--- config/
+|    |    |--- db.js
+|    |--- routes/
+|    |--- controllers/
+|    |--- models/
+|    |--- server.js
+|
+|--- frontend/
+|    |--- assets/
+|    |    |--- css/style.css 
+|    |    |--- js/script.js 
+|    |--- index.html
+|
+|--- .env
+|--- package.json
+|--- package-lock.json
+
 
 # 5. Configuración del Proyecto
 
 # 5.1 Base de Datos:
-# Inicia XAMPP y abre phpMyAdmin.
+ Inicia XAMPP y abre phpMyAdmin.
 
 # Crea una base de datos llamada "replit_make":
 mysql -u root -p
@@ -68,7 +69,7 @@ INSERT INTO usuarios (nombre, correo, contraseña)
 VALUES ('Root Admin', 'admin@root.com', '$2b$10$7s5jZ5Y1iTpPzxKbdkp2xe0mjV5i6KAKt3V8Bx7cKpmfMHKk8hDKS');
 
 # 5.2 Configuración de Variables de Entorno:
-# Crea un archivo .env en la raíz del proyecto y agrega lo siguiente:
+ Crea un archivo .env en la raíz del proyecto y agrega lo siguiente:
 echo "DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=
@@ -86,7 +87,7 @@ cd frontend
 live-server
 
 # 7. Prueba la Conexión
-# Abre el archivo frontend/index.html en tu navegador.
-# Haz clic en el botón "Probar Backend".
-# Deberías ver la respuesta del backend en pantalla.
-#importante: tener XAMPP activo con Apache y MySQL activos
+ Abre el archivo frontend/index.html en tu navegador.
+ Haz clic en el botón "Probar Backend".
+ Deberías ver la respuesta del backend en pantalla.
+importante: tener XAMPP activo con Apache y MySQL activos
