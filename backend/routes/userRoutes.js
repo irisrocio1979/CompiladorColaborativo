@@ -1,34 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcrypt'); // Para encriptar contraseñas
+const bcrypt = require('bcrypt');
 const db = require('../config/db');
-const session = require('express-session');
-
-// Configurar sesión
-router.use(session({
-    secret: 'secret-key',
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-        secure: false,  // Solo para desarrollo local sin HTTPS
-        httpOnly: true, // Asegura que la cookie no pueda ser accesada por JavaScript
-        maxAge: 24 * 60 * 60 * 1000, // Duración de la sesión
-        sameSite: 'lax'//'strict'  
-    }
-}));
-
-
-
-// Ruta para obtener todos los usuarios (opcional, para pruebas o administración)
-router.get('/usuarios', async (req, res) => {
-    try {
-        const [rows] = await db.query('SELECT * FROM usuarios');
-        res.json(rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Error al obtener usuarios');
-    }
-});
+const { exec } = require('child_process');
+const fs = require('fs');
 
 // Ruta para registrar un nuevo usuario
 router.post('/usuarios/registro', async (req, res) => {
@@ -39,25 +14,18 @@ router.post('/usuarios/registro', async (req, res) => {
     }
 
     try {
-        // Verificar si el correo ya está registrado
         const [existingUser] = await db.query('SELECT * FROM usuarios WHERE correo = ?', [correo]);
         if (existingUser.length > 0) {
             return res.status(400).json({ success: false, error: 'El correo ya está registrado' });
         }
 
-        // Encriptar contraseña
         const hashedPassword = await bcrypt.hash(contraseña, 10);
+        await db.query('INSERT INTO usuarios (nombre, correo, contraseña) VALUES (?, ?, ?)', [nombre, correo, hashedPassword]);
 
-        // Insertar el nuevo usuario en la base de datos
-        await db.query(
-            'INSERT INTO usuarios (nombre, correo, contraseña) VALUES (?, ?, ?)',
-            [nombre, correo, hashedPassword]
-        );
-
-        res.status(201).json({success: true, message: 'Usuario registrado con éxito' });
+        res.status(201).json({ success: true, message: 'Usuario registrado con éxito' });
     } catch (err) {
         console.error(err);
-        res.status(500).send({success: false, error:'Error al registrar usuario'});
+        res.status(500).json({ success: false, error: 'Error al registrar usuario' });
     }
 });
 
@@ -116,30 +84,6 @@ router.get('/usuarios/verify-session', (req, res) => {
     }
 });
 
-
-// Ruta para cerrar sesión
-router.post('/usuarios/logout', (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            return res.status(500).send('Error al cerrar sesión');
-        }
-        res.json({ message: 'Sesión cerrada exitosamente' });
-    });
-});
-
-// Ruta para eliminar un usuario (opcional, solo para pruebas)
-router.delete('/usuarios/:id', async (req, res) => {
-    const { id } = req.params;
-
-    try {
-        await db.query('DELETE FROM usuarios WHERE id = ?', [id]);
-        res.json({ message: 'Usuario eliminado con éxito' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Error al eliminar usuario');
-    }
-});
-
 // Middleware de autenticación para verificar si el usuario está autenticado
 function autenticar(req, res, next) {
     if (!req.session.usuario) {
@@ -149,11 +93,8 @@ function autenticar(req, res, next) {
 }
 
 
-const { exec } = require('child_process'); // Importa exec para ejecutar comandos en la terminal
-
-// Ruta para ejecutar código Python
-router.post('/py', async (req, res) => {
-
+// Ruta para ejecutar código
+router.post('/run', async (req, res) => {
     console.log("Se recibió una solicitud para ejecutar Python:", req.body);
 
     const { code } = req.body;
@@ -163,24 +104,59 @@ router.post('/py', async (req, res) => {
     }
 
     // Guardar el código en un archivo temporal
-    const fs = require('fs');
     const tempFilePath = './temp_script.py';
-
     fs.writeFileSync(tempFilePath, code, 'utf8');
 
-    // Ejecutar el archivo usando Python
-    exec(`python ${tempFilePath}`, (error, stdout, stderr) => {
+    // Ejecutar el archivo usando Python con un timeout de 10 segundos
+    exec(`python ${tempFilePath}`, { timeout: 10000 }, (error, stdout, stderr) => {
         // Eliminar el archivo temporal después de la ejecución
         fs.unlinkSync(tempFilePath);
 
+        // Verificar si hubo un error o si se alcanzó el tiempo de espera
         if (error) {
+            if (error.signal === 'SIGTERM') {
+                return res.status(500).json({ error: 'El código excedió el tiempo de ejecución (bucle infinito o proceso largo)' });
+            }
             return res.status(500).json({ error: stderr || 'Error ejecutando el código' });
         }
 
+        // Si todo salió bien, devolver la salida
         res.json({ output: stdout });
     });
 });
 
+// Ruta para compartir proyectos
+router.post('/proyectos/compartir', async (req, res) => {
+    const { nombreProyecto, sharedWithUser } = req.body;
+    const userId = req.session.user.id;  // ID del usuario autenticado
 
+    if (!nombreProyecto || !sharedWithUser) {
+        return res.status(400).json({ error: 'Datos incompletos' });
+    }
+
+    try {
+        // Obtener el ID del proyecto
+        const projectId = await getProjectId(nombreProyecto, userId);
+
+        // Insertar en la tabla proyectos_compartidos
+        await db.query('INSERT INTO proyectos_compartidos (proyecto_id, usuario_id) VALUES (?, ?)', [projectId, sharedWithUser]);
+
+        res.status(200).json({ message: 'Proyecto compartido exitosamente' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error compartiendo el proyecto' });
+    }
+});
+
+
+// Cerrar sesión
+router.post('/usuarios/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).send('Error al cerrar sesión');
+        }
+        res.json({ message: 'Sesión cerrada exitosamente' });
+    });
+});
 
 module.exports = router;

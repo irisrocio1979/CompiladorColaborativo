@@ -6,9 +6,10 @@
 	<title>Replit 2</title>
 	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 	<link rel="manifest" href="/site.webmanifest">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/hint/show-hint.min.css"> <!-- Estilos del autocompletado -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.css"> <!-- Estilos del autocompletado -->
 	<link rel="stylesheet" href="assets/css/style.css">
+	<link rel="stylesheet" href="assets/css/mandala.css">
 
 </head>
 <body>
@@ -23,6 +24,25 @@
 			<button onclick="mostrarSeccion('registro')">Registrarse</button>
 			<button onclick="mostrarSeccion('login')">Iniciar Sesión</button>
 		</div>
+		<div id="mandala-container">
+			<span class="large-circles">
+			  <div class="circle one"></div>
+			  <div class="circle two"></div>
+			  <div class="circle three"></div>
+			  <div class="circle four"></div>
+			  <div class="circle five"></div>
+			  <div class="circle six"></div>
+			  <div class="circle seven"></div>
+			  <div class="circle eight"></div>
+			</span>
+			<span class="small-shapes">
+			  <div class="small squircle two"></div>
+			  <div class="small squircle four"></div>
+			  <div class="small squircle six"></div>
+			  <div class="small squircle eight"></div>
+			</span>
+		  </div>
+		  
 	</section>
 
 	<!-- Área de Registro -->
@@ -71,7 +91,7 @@
 					<rect x="0.5" y="0.5" width="19" height="17" rx="1.5" stroke="white"/>
 					<line x1="5.5" y1="1" x2="5.5" y2="17" stroke="white"/>
 				</svg>		
-				<h1 contenteditable>Proyecto con un nombre chido</h1>
+				<h1 contenteditable>Proyecto nuevo</h1>
 			</div>
 			<button type="button" id="run_button">
 				<svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -79,10 +99,38 @@
 				</svg>
 				Run			
 			</button>
-			<div class="info">
-			    <img src="default.jpeg" alt="Imagen de usuario" width="32" height="32">
-			    <span>@usuario</span>
+			<div class="Colaborativo">
+				<button id="shareButton" onclick="compartirProyecto()">Compartir Proyecto</button>
+
 			</div>
+			<!-- Modal para ingresar correo -->
+			<div id="modalCompartir" class="modal" style="display: none;">
+				<div class="modal-content">
+					<h2>Compartir Proyecto</h2>
+					<label for="correoCompartir">Correo del usuario:</label>
+					<input type="email" id="correoCompartir" placeholder="Correo del usuario" required>
+					<button onclick="compartirProyecto()">Compartir</button>
+					<button onclick="cerrarModal()">Cancelar</button>
+				</div>
+			</div>
+			<div class="theme-switcher">
+				<button id="switchThemeButton" title="Cambiar tema">
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M12 3V5M12 19V21M5.22183 5.22183L6.63604 6.63604M17.364 17.364L18.7782 18.7782M3 12H5M19 12H21M5.22183 18.7782L6.63604 17.364M17.364 6.63604L18.7782 5.22183M12 7C9.79086 7 8 8.79086 8 11C8 13.2091 9.79086 15 12 15C14.2091 15 16 13.2091 16 11C16 8.79086 14.2091 7 12 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+				</button>
+			</div>
+			<div class="info" id="infoContainer">
+				
+				<img src="default.jpeg" alt="Imagen de usuario" width="32" height="32">
+				<span id="userName">@usuario</span>
+				<div class="dropdownPerfil" id="userMenu" hidden>
+					<p id="userEmail">correo@example.com</p>
+					<button id="logoutButton">Cerrar sesión</button>
+				</div>
+				
+			</div>
+			
 
 		</header>
 
@@ -103,6 +151,7 @@
 						main.py
 					</div>		
 				</header>
+				
 				<section>
 					<textarea name="code" id="code" title="code"></textarea>
 				</section>
@@ -138,16 +187,17 @@
 
 	<script src="assets/js/script.js"></script>
 
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/python/python.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/hint/show-hint.min.js"></script> <!-- Autocompletado -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/hint/python-hint.min.js"></script> <!-- Autocompletado específico para Python -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.js"></script> <!-- Autocompletado -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/python-hint.min.js"></script> <!-- Autocompletado específico para Python -->
 	<script>
 		var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
             lineNumbers: true,
             mode: "python",
             theme: "default", // Puedes cambiar al tema que prefieras
             autofocus: true,
+			gutters: ["CodeMirror-linenumbers"],
             extraKeys: { "Ctrl-Space": "autocomplete" }, // Habilitar autocompletado con Ctrl+Espacio
             hintOptions: { "completeSingle": false } // Mostrar lista de sugerencias automáticamente al escribir
         });

@@ -12,6 +12,31 @@ document.getElementById('testBackend').addEventListener('click', () => {
 */
 document.addEventListener('DOMContentLoaded', () => {
 
+    const infoContainer = document.getElementById('infoContainer');
+    const userMenu = document.getElementById('userMenu');
+    const logoutButton = document.getElementById('logoutButton');
+
+    // Alternar visibilidad del menú al hacer clic en el contenedor .info
+    infoContainer.addEventListener('click', (e) => {
+        e.stopPropagation(); // Evita que el clic se propague a otros elementos
+        const isHidden = userMenu.hidden;
+        document.querySelectorAll('.dropdownPerfil').forEach(menu => menu.hidden = true); // Oculta otros menús si los hay
+        userMenu.hidden = !isHidden; // Alterna visibilidad del menú actual
+    });
+
+    // Cerrar sesión
+    logoutButton.addEventListener('click', () => {
+        localStorage.removeItem('userSession'); // Elimina la sesión del almacenamiento local
+        alert('Has cerrado sesión.');
+        window.location.hash = "login"; // Redirige a la página de inicio de sesión
+        location.reload(); // Recarga la página
+    });
+
+    // Ocultar el menú al hacer clic fuera de él
+    document.addEventListener('click', () => {
+        userMenu.hidden = true;
+    });
+
     // Función para mostrar una sección y ocultar las demás
     const mostrarSeccion = (id) => {
         console.log("Mostrando sección:", id); // Verifica qué sección intenta mostrarse
@@ -241,7 +266,7 @@ function mostrarSeccion(seccion) {
 
 document.getElementById('run_button').addEventListener('click', function() {
     const code = editor.getValue();
-    fetch('http://localhost:3000/api/py', { // Ajusta el puerto si es necesario
+    fetch('http://localhost:3000/api/run', { // Ajusta el puerto si es necesario
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -261,3 +286,101 @@ document.getElementById('run_button').addEventListener('click', function() {
     })
     .catch(error => console.error('Error:', error));
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    const themeSwitcher = document.getElementById('switchThemeButton');
+
+    // Función para alternar el tema
+    const toggleTheme = () => {
+        const currentTheme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+        // Cambiar la clase en el body
+        document.body.classList.remove(`${currentTheme}-theme`);
+        document.body.classList.add(`${newTheme}-theme`);
+
+        // Guardar el tema en localStorage
+        localStorage.setItem('theme', newTheme);
+
+        // Mostrar en consola que el tema ha cambiado con color log
+        console.log(
+            `%cTema cambiado a: ${newTheme}`,
+            `color: ${newTheme === 'light' ? '#007bff' : '#4caf50'}; font-weight: bold; font-size: 14px;`
+        );
+    };
+
+    // Función para cargar el tema desde localStorage
+    const loadTheme = () => {
+        const savedTheme = localStorage.getItem('theme') || 'dark'; // Por defecto, oscuro
+        document.body.classList.add(`${savedTheme}-theme`);
+
+        // Mostrar en consola el tema inicial cargado
+        console.log(
+            `%cTema inicial cargado: ${savedTheme}`,
+            `color: ${savedTheme === 'light' ? '#007bff' : '#4caf50'}; font-weight: bold; font-size: 14px;`
+        );
+    };
+
+    // Escuchar el clic en el botón
+    themeSwitcher.addEventListener('click', toggleTheme);
+
+    // Cargar el tema al inicio
+    loadTheme();
+});
+
+// Mostrar el formulario para compartir
+function mostrarFormularioCompartir() {
+    document.getElementById('modalCompartir').style.display = 'block';
+}
+
+// Cerrar el modal
+function cerrarModal() {
+    document.getElementById('modalCompartir').style.display = 'none';
+}
+
+
+document.getElementById('shareButton').addEventListener('click', compartirProyecto);
+
+function compartirProyecto() {
+    const projectId = getProjectId(); // Esta función debería obtener el ID del proyecto actual (puedes gestionarlo con un estado en tu aplicación).
+    const sharedWithUser = prompt("Introduce el ID del usuario con el que deseas compartir el proyecto:");
+
+    if (!sharedWithUser) {
+        alert("Debe ingresar un usuario válido.");
+        return;
+    }
+
+    fetch('http://localhost:3000/api/proyectos/compartir', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ projectId, sharedWithUser })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert("Proyecto compartido exitosamente.");
+        } else {
+            alert("Error al compartir el proyecto: " + (data.error || 'Desconocido'));
+        }
+    })
+    .catch(error => console.error('Error al compartir el proyecto:', error));
+}
+
+// Función para obtener el ID del proyecto basado en el nombre (u otro parámetro)
+const getProjectId = async (nombreProyecto, userId) => {
+    try {
+        const query = 'SELECT id FROM proyectos WHERE nombre = ? AND creador_id = ?';
+        const [rows] = await db.query(query, [nombreProyecto, userId]);
+
+        if (rows.length > 0) {
+            return rows[0].id;  // Retorna el ID del proyecto si se encuentra
+        } else {
+            throw new Error('Proyecto no encontrado o el usuario no es el creador');
+        }
+    } catch (err) {
+        console.error('Error al obtener el ID del proyecto:', err);
+        throw new Error('Error al obtener el ID del proyecto');
+    }
+};
