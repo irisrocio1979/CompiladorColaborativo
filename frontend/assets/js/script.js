@@ -266,6 +266,9 @@ function mostrarSeccion(seccion) {
 
 document.getElementById('run_button').addEventListener('click', function() {
     const code = editor.getValue();
+    const nombreProyecto = document.querySelector('.header-container h1').textContent.trim();
+    const usuarioId = localStorage.getItem('userId');
+
     fetch('http://localhost:3000/api/run', { // Ajusta el puerto si es necesario
         method: 'POST',
         headers: {
@@ -327,60 +330,74 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cargar el tema al inicio
     loadTheme();
 });
-
-// Mostrar el formulario para compartir
-function mostrarFormularioCompartir() {
-    document.getElementById('modalCompartir').style.display = 'block';
+// Función para mostrar el modal de descripción
+function mostrarModalDescripcion() {
+    document.getElementById('modalDescripcion').style.display = 'block';
 }
 
-// Cerrar el modal
-function cerrarModal() {
-    document.getElementById('modalCompartir').style.display = 'none';
+// Función para cerrar el modal de descripción
+function cerrarModalDescripcion() {
+    document.getElementById('modalDescripcion').style.display = 'none';
 }
 
+// Función para guardar la descripción
+function guardarDescripcion() {
+    var description = document.getElementById('projectDescription').value;
+    if (description) {
+        alert("Descripción guardada: " + description);
+        cerrarModalDescripcion();
+    } else {
+        alert("Por favor, ingresa una descripción.");
+    }
+}
 
-document.getElementById('shareButton').addEventListener('click', compartirProyecto);
+/*save proyecto */
+function registrarProyecto() {
+    const projectName = document.querySelector("h1[contenteditable]").innerText.trim(); // Nombre del proyecto
+    const projectDescription = document.getElementById("projectDescription").value.trim(); // Descripción del proyecto
+    const projectCode = editor.getValue(); // Código del proyecto (asumiendo que 'editor' es el área donde se escribe el código)
+    const userSession = JSON.parse(localStorage.getItem('userSession')); // Obtener la sesión activa
 
-function compartirProyecto() {
-    const projectId = getProjectId(); // Esta función debería obtener el ID del proyecto actual (puedes gestionarlo con un estado en tu aplicación).
-    const sharedWithUser = prompt("Introduce el ID del usuario con el que deseas compartir el proyecto:");
-
-    if (!sharedWithUser) {
-        alert("Debe ingresar un usuario válido.");
+    // Verificar si el usuario está logueado
+    if (!userSession || !userSession.user || !userSession.user.id) {
+        alert('No estás logueado o no se ha encontrado tu sesión.');
         return;
     }
 
-    fetch('http://localhost:3000/api/proyectos/compartir', {
+    const creatorId = userSession.user.id; // ID del usuario que crea el proyecto
+
+    // Si la descripción está vacía, se puede registrar como 'none'
+    const descriptionToSave = projectDescription || 'none'; // Si está vacío, se usa 'none'
+
+    // Realizar la petición al backend para guardar el proyecto
+    fetch('http://localhost:3000/api/crear-proyecto', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ projectId, sharedWithUser })
+        body: JSON.stringify({
+            nombre: projectName,
+            descripcion: descriptionToSave,
+            codigo: projectCode,
+            creador_id: creatorId
+        })
     })
     .then(response => response.json())
     .then(data => {
-        if (data.message) {
-            alert("Proyecto compartido exitosamente.");
+        if (data.success) {
+            alert('Proyecto creado exitosamente');
+            // Opcional: Redirigir al usuario al proyecto creado o a la página de inicio
+            window.location.hash = `proyecto/${data.proyecto.id}`;
         } else {
-            alert("Error al compartir el proyecto: " + (data.error || 'Desconocido'));
+            alert('Error al crear el proyecto: ' + (data.error || 'Intenta nuevamente.'));
         }
     })
-    .catch(error => console.error('Error al compartir el proyecto:', error));
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Hubo un error al crear el proyecto.');
+    });
+
+    // Mostrar el campo de descripción solo cuando se presiona "Save"
+    let descriptionContainer = document.getElementById("descriptionContainer");
+    descriptionContainer.style.display = "block";
 }
-
-// Función para obtener el ID del proyecto basado en el nombre (u otro parámetro)
-const getProjectId = async (nombreProyecto, userId) => {
-    try {
-        const query = 'SELECT id FROM proyectos WHERE nombre = ? AND creador_id = ?';
-        const [rows] = await db.query(query, [nombreProyecto, userId]);
-
-        if (rows.length > 0) {
-            return rows[0].id;  // Retorna el ID del proyecto si se encuentra
-        } else {
-            throw new Error('Proyecto no encontrado o el usuario no es el creador');
-        }
-    } catch (err) {
-        console.error('Error al obtener el ID del proyecto:', err);
-        throw new Error('Error al obtener el ID del proyecto');
-    }
-};

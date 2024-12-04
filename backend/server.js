@@ -60,6 +60,25 @@ app.get('/', (req, res) => {
     res.send('¡Backend funcionando con WebSockets!');
 });
 
+
+require('dotenv').config();
+const mysql = require('mysql2');
+
+// Configura la conexión con la base de datos usando las variables de entorno
+const db = mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT
+});
+
+db.connect(err => {
+    if (err) throw err;
+    console.log('Conectado a la base de datos');
+});
+
+
 // Iniciar el servidor
 server.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);

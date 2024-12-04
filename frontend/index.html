@@ -92,7 +92,26 @@
 					<line x1="5.5" y1="1" x2="5.5" y2="17" stroke="white"/>
 				</svg>		
 				<h1 contenteditable>Proyecto nuevo</h1>
+				
 			</div>
+			<!-- Botón para registrar el proyecto -->
+		    <button type="button" id="saveButton" onclick="registrarProyecto()">Save</button>
+			<!-- Modal para agregar descripción -->
+			<div id="modalDescripcion" class="modal">
+				<div class="modal-content">
+					<span class="close-button" onclick="cerrarModalDescripcion()">&times;</span>
+					<h2>Agregar Descripción del Proyecto</h2>
+					<p>Escribe una descripción para tu proyecto.</p>
+					<div id="descriptionContainer" class="description-container">
+						<textarea id="projectDescription" placeholder="Escribe una descripción aquí"></textarea>
+					</div>
+					<div class="modal-actions">
+						<button id="cancelButton" class="btn-cancel" onclick="cerrarModalDescripcion()">Cancelar</button>
+						<button id="saveButton" class="btn-save" onclick="guardarDescripcion()">Guardar</button>
+					</div>
+				</div>
+			</div>
+
 			<button type="button" id="run_button">
 				<svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path fill-rule="evenodd" clip-rule="evenodd" d="M10.7965 5.955C10.8933 6.00933 10.9739 6.08845 11.0299 6.18424C11.086 6.28002 11.1156 6.38901 11.1156 6.5C11.1156 6.61099 11.086 6.71998 11.0299 6.81576C10.9739 6.91155 10.8933 6.99067 10.7965 7.045L3.5565 11.1175C3.46137 11.171 3.35389 11.1987 3.24474 11.1978C3.13559 11.1969 3.02859 11.1674 2.93438 11.1123C2.84017 11.0571 2.76203 10.9783 2.70776 10.8836C2.65348 10.7889 2.62495 10.6817 2.625 10.5725V2.4275C2.62495 2.31835 2.65348 2.21108 2.70776 2.11639C2.76203 2.02169 2.84017 1.94285 2.93438 1.88773C3.02859 1.83261 3.13559 1.80313 3.24474 1.80221C3.35389 1.80129 3.46137 1.82897 3.5565 1.8825L10.7965 5.9555V5.955Z" fill="#004D0D"/>
@@ -100,19 +119,25 @@
 				Run			
 			</button>
 			<div class="Colaborativo">
-				<button id="shareButton" onclick="compartirProyecto()">Compartir Proyecto</button>
-
+				<button id="shareButton" onclick="mostrarModal()">Compartir Proyecto</button>
 			</div>
-			<!-- Modal para ingresar correo -->
-			<div id="modalCompartir" class="modal" style="display: none;">
+			<div id="modalCompartir" class="modal">
 				<div class="modal-content">
+					<span class="close-button">&times;</span>
 					<h2>Compartir Proyecto</h2>
-					<label for="correoCompartir">Correo del usuario:</label>
-					<input type="email" id="correoCompartir" placeholder="Correo del usuario" required>
-					<button onclick="compartirProyecto()">Compartir</button>
-					<button onclick="cerrarModal()">Cancelar</button>
+					<p>Introduce los correos electrónicos de los usuarios para compartir el proyecto. Presiona "Enter" para agregar cada correo.</p>
+					<div id="email-container" class="email-container">
+						<input type="text" id="emailInput" placeholder="Escribe un correo y presiona Enter">
+					</div>
+					<div class="modal-actions">
+						<button id="cancelButton" class="btn-cancel">Cancelar</button>
+						<button id="shareButton" class="btn-share">Compartir</button>
+					</div>
 				</div>
 			</div>
+			
+			
+			
 			<div class="theme-switcher">
 				<button id="switchThemeButton" title="Cambiar tema">
 					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -186,6 +211,7 @@
 	</section>
 
 	<script src="assets/js/script.js"></script>
+	<script src="assets/js/compartir.js"></script>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
@@ -195,7 +221,7 @@
 		var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
             lineNumbers: true,
             mode: "python",
-            theme: "default", // Puedes cambiar al tema que prefieras
+            theme: "default",
             autofocus: true,
 			gutters: ["CodeMirror-linenumbers"],
             extraKeys: { "Ctrl-Space": "autocomplete" }, // Habilitar autocompletado con Ctrl+Espacio

@@ -126,25 +126,64 @@ router.post('/run', async (req, res) => {
 });
 
 // Ruta para compartir proyectos
-router.post('/proyectos/compartir', async (req, res) => {
-    const { nombreProyecto, sharedWithUser } = req.body;
-    const userId = req.session.user.id;  // ID del usuario autenticado
+router.post('/proyectos/compartir', autenticar, async (req, res) => {
+    const { emails } = req.body;
 
-    if (!nombreProyecto || !sharedWithUser) {
-        return res.status(400).json({ error: 'Datos incompletos' });
+    if (!emails || !Array.isArray(emails) || emails.length === 0) {
+        return res.status(400).json({ success: false, error: 'Debe proporcionar al menos un correo.' });
     }
 
     try {
-        // Obtener el ID del proyecto
-        const projectId = await getProjectId(nombreProyecto, userId);
+        // Opcional: Filtrar correos válidos y buscar usuarios en la base de datos
+        const [users] = await db.query('SELECT correo FROM usuarios WHERE correo IN (?)', [emails]);
 
-        // Insertar en la tabla proyectos_compartidos
-        await db.query('INSERT INTO proyectos_compartidos (proyecto_id, usuario_id) VALUES (?, ?)', [projectId, sharedWithUser]);
+        if (users.length === 0) {
+            return res.status(404).json({ success: false, error: 'No se encontraron usuarios para los correos proporcionados.' });
+        }
 
-        res.status(200).json({ message: 'Proyecto compartido exitosamente' });
+        // Lógica para vincular usuarios con el proyecto (ejemplo)
+        // await db.query('INSERT INTO permisos (proyecto_id, usuario_id) VALUES (?, ?)', [proyectoId, userId]);
+
+        res.json({ success: true, message: 'Proyecto compartido exitosamente.', sharedWith: users });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Error compartiendo el proyecto' });
+        res.status(500).json({ success: false, error: 'Error al compartir el proyecto.' });
+    }
+});
+
+// Ruta para crear o actualizar un proyecto
+router.post('/crear-proyecto', autenticar, async (req, res) => {
+    const { id, nombre, descripcion, codigo, creador_id } = req.body;
+
+    // Verificar que todos los campos obligatorios estén presentes
+    if (!nombre || !descripcion || !codigo || !creador_id) {
+        return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+    }
+
+    try {
+        if (id) {
+            // Si existe un id, intentamos actualizar el proyecto
+            const [existingProject] = await db.query('SELECT * FROM proyectos WHERE id = ?', [id]);
+
+            if (existingProject.length === 0) {
+                return res.status(404).json({ error: 'Proyecto no encontrado' });
+            }
+
+            // Actualizar el proyecto en la base de datos
+            const query = 'UPDATE proyectos SET nombre = ?, descripcion = ?, codigo = ?, creador_id = ? WHERE id = ?';
+            await db.query(query, [nombre, descripcion, codigo, creador_id, id]);
+
+            return res.json({ success: true, message: 'Proyecto actualizado exitosamente' });
+        } else {
+            // Si no existe un id, creamos un nuevo proyecto
+            const query = 'INSERT INTO proyectos (nombre, descripcion, codigo, creador_id) VALUES (?, ?, ?, ?)';
+            const [result] = await db.query(query, [nombre, descripcion, codigo, creador_id]);
+
+            return res.status(201).json({ success: true, proyecto: { id: result.insertId, nombre, descripcion, codigo, creador_id } });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error al crear o actualizar el proyecto' });
     }
 });
 
